@@ -15,3 +15,26 @@ abstract contract ERC20Token {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 }
+
+contract Owned {
+    address public owner;
+    address public newOwner;
+
+    event OwnershipTransferred(address indexed _from, address indexed _to);
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function transferOwnership(address _to) public {
+        require(msg.sender == owner, "Only current owner can transfer");
+        newOwner = _to;
+    }
+
+    function acceptOwnership() public {
+        require(msg.sender == newOwner, "Only new owner can accept");
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
+        newOwner = address(0);
+    }
+}
