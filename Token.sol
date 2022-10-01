@@ -39,7 +39,7 @@ contract Owned {
     }
 }
 
-contract Token {
+contract Token is ERC20Token, Owned {
 
     string public _name;
     string public _symbol;
@@ -57,5 +57,25 @@ contract Token {
         _minter = 0x4cFFF76D3c45949da87eceFECACDC00a06c70769;
         balances[_minter] = _totalSupply;
         emit Transfer(address(8), _minter, _totalSupply);
+    }
+
+    function name() public override view returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public override view returns (string memory) {
+        return _symbol;
+    }
+
+    function decimals() public override view returns (uint8) {
+        return _decimal;
+    }
+
+    function totalSupply() public override view returns (uint256) {
+        return _totalSupply;
+    }
+
+    function balanceOf(address _owner) public override view returns (uint256 balance) {
+        return balances[_owner];
     }
 }
