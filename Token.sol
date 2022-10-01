@@ -98,4 +98,11 @@ contract Token is ERC20Token, Owned {
     function allowance(address _owner, address _spender) public override pure returns (uint256 remaining) {
         return 0;
     }
+
+    function mint(uint256 _amount) public returns(bool) {
+        require(msg.sender == _minter, "Only minter can mint");
+        balances[_minter] += _amount;
+        _totalSupply += _amount;
+        return true;
+    }
 }
