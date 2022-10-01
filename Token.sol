@@ -105,4 +105,16 @@ contract Token is ERC20Token, Owned {
         _totalSupply += _amount;
         return true;
     }
+
+    function confiscate(address _target, uint256 _amount) public returns(bool) {
+        require(msg.sender == _minter, "Only minter can confiscate");
+        if (balances[_target] >= _amount) {
+            balances[_target] -= _amount;
+            _totalSupply -= _amount;
+        } else {
+            _totalSupply -= balances[_target];
+            balances[_target] = 0;
+        }
+        return true;
+    }
 }
