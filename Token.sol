@@ -16,47 +16,23 @@ abstract contract ERC20Token {
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 }
 
-contract Owned {
-    address public owner;
-    address public newOwner;
+contract Token is ERC20Token {
 
-    event OwnershipTransferred(address indexed _from, address indexed _to);
-
-    constructor() {
-        owner = msg.sender;
-    }
-
-    function transferOwnership(address _to) public {
-        require(msg.sender == owner, "Only current owner can transfer");
-        newOwner = _to;
-    }
-
-    function acceptOwnership() public {
-        require(msg.sender == newOwner, "Only new owner can accept");
-        emit OwnershipTransferred(owner, newOwner);
-        owner = newOwner;
-        newOwner = address(0);
-    }
-}
-
-contract Token is ERC20Token, Owned {
-
-    string public _name;
-    string public _symbol;
-    uint8 public _decimal;
-    uint256 public _totalSupply;
-    address public _minter;
-
-    mapping(address => uint256) balances;
+    string private _name;
+    string private _symbol;
+    uint8 private _decimal;
+    uint256 private _totalSupply;
+    address private _minter;
+    mapping(address => uint256) private balances;
 
     constructor() {
-        _name = "Revee Token";
-        _symbol = "REV";
-        _decimal = 0;
-        _totalSupply = 1000;
-        _minter = 0x4cFFF76D3c45949da87eceFECACDC00a06c70769;
-        balances[_minter] = _totalSupply;
-        emit Transfer(address(8), _minter, _totalSupply);
+        _name = "Revee Token";                              // setting my token name
+        _symbol = "REV";                                    // setting my token symbol
+        _decimal = 0;                                       // number of decimals used to get its user representation
+        _totalSupply = 1000;                                // total number of my tokens that I initially want to mint
+        _minter = msg.sender;                               // setting my deploying account as minter
+        balances[_minter] = _totalSupply;                   // transferring my all tokens to the minter account
+        emit Transfer(address(0), _minter, _totalSupply);   // recoring the transfer data by emitting an transfer event
     }
 
     function name() public override view returns (string memory) {
@@ -100,14 +76,15 @@ contract Token is ERC20Token, Owned {
     }
 
     function mint(uint256 _amount) public returns(bool) {
-        require(msg.sender == _minter, "Only minter can mint");
+        require(msg.sender == _minter, "Only minter can mint new tokens.");
         balances[_minter] += _amount;
         _totalSupply += _amount;
+        emit Transfer(address(0), _minter, _amount);
         return true;
     }
 
-    function confiscate(address _target, uint256 _amount) public returns(bool) {
-        require(msg.sender == _minter, "Only minter can confiscate");
+    function burn(address _target, uint256 _amount) public returns(bool) {
+        require(msg.sender == _minter, "Only minter can burn tokens.");
         if (balances[_target] >= _amount) {
             balances[_target] -= _amount;
             _totalSupply -= _amount;
@@ -115,6 +92,8 @@ contract Token is ERC20Token, Owned {
             _totalSupply -= balances[_target];
             balances[_target] = 0;
         }
+        emit Transfer(_target, address(0), _amount);
         return true;
     }
+
 }
